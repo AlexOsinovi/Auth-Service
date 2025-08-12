@@ -1,0 +1,30 @@
+  databaseChangeLog:
+    - changeSet:
+        id: 20250811-01
+        author: aleksei osinovi
+        comment: Create users table for storing user data
+        changes:
+          - createTable:
+              tableName: auth_users
+              columns:
+                - column:
+                    name: id
+                    type: bigint
+                    autoIncrement: true
+                    constraints:
+                      primaryKey: true
+                      nullable: false
+                - column:
+                    name: email
+                    type: varchar(128)
+                    constraints:
+                      nullable: false
+                      unique: true
+                - column:
+                    name: password
+                    type: varchar(128)
+                    constraints:
+                      nullable: false
+        rollback:
+          - dropTable:
+              tableName: auth_users
