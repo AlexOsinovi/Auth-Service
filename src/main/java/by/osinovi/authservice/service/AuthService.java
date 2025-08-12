@@ -63,22 +63,21 @@ public class AuthService implements UserDetailsService {
     public AuthResponse refresh(String tokenHeader) {
         String token = getTokenFromHeader(tokenHeader);
         if (!jwtUtil.isRefreshToken(token)) throw new JwtException("Invalid token type");
-
         String email = jwtUtil.extractEmail(token);
         UserDetails userDetails = loadUserByUsername(email);
-
         String accessToken = jwtUtil.generateAccessToken(userDetails);
         String refreshToken = jwtUtil.generateRefreshToken(userDetails);
-
         return new AuthResponse(accessToken, refreshToken);
     }
 
-    public Boolean validate(String tokenHeader) {
+    public boolean validate(String tokenHeader) {
         String token = getTokenFromHeader(tokenHeader);
-        return jwtUtil.isTokenValid(token, null);
+        String email = jwtUtil.extractEmail(token);
+        UserDetails userDetails = loadUserByUsername(email);
+        return jwtUtil.isTokenValid(token, userDetails);
     }
 
-    private String getTokenFromHeader(String header) {
+    public String getTokenFromHeader(String header) {
         if (header != null && header.startsWith("Bearer ")) return header.substring(7);
         else throw new JwtException("Invalid <Authorization> header type");
     }

@@ -1,16 +1,18 @@
 package by.osinovi.authservice.controller;
 
 import by.osinovi.authservice.dto.auth.AuthRequest;
-import by.osinovi.authservice.dto.token.TokenValidationRequest;
 import by.osinovi.authservice.dto.token.TokenValidationResponse;
 import by.osinovi.authservice.service.AuthService;
 import by.osinovi.authservice.util.JwtUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,19 +34,19 @@ public class AuthController {
     }
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<?> refreshToken(@RequestBody String refreshToken) {
+    public ResponseEntity<?> refreshToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String tokenHeader) {
         try {
-            return ResponseEntity.ok(authService.refresh(refreshToken));
+            return ResponseEntity.ok(authService.refresh(tokenHeader));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error processing refresh token: " + e.getMessage());
         }
     }
 
-    @PostMapping("/validate-token")
-    public ResponseEntity<?> validateToken(@Valid @RequestBody TokenValidationRequest request) {
+    @GetMapping("/validate-token")
+    public ResponseEntity<?> validateToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String tokenHeader) {
         try {
-            boolean isValid = authService.validate("Bearer " + request.getToken());
-            String email = isValid ? jwtUtil.extractEmail(request.getToken()) : null;
+            boolean isValid = authService.validate(tokenHeader);
+            String email = isValid ? jwtUtil.extractEmail(authService.getTokenFromHeader(tokenHeader)) : null;
             return ResponseEntity.ok(new TokenValidationResponse(isValid, email));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid token: " + e.getMessage());
