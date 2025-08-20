@@ -24,8 +24,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
@@ -82,12 +85,10 @@ class AuthIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(content().string("User registered successfully"));
 
-        // Verify user in database
         AuthUser user = authUserRepository.findByEmail("test@example.com").orElse(null);
         assertNotNull(user);
         assertTrue(passwordEncoder.matches("password123", user.getPassword()));
 
-        // Login with the same credentials
         AuthRequest loginRequest = new AuthRequest("test@example.com", "password123");
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -99,14 +100,12 @@ class AuthIntegrationTests {
 
     @Test
     void login_WrongCredentials_ReturnsUnauthorized() throws Exception {
-        // Register a user
         AuthRequest registerRequest = new AuthRequest("test@example.com", "password123");
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(registerRequest)))
                 .andExpect(status().isOk());
 
-        // Attempt login with wrong password
         AuthRequest loginRequest = new AuthRequest("test@example.com", "wrongPassword");
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -117,7 +116,6 @@ class AuthIntegrationTests {
 
     @Test
     void refreshToken_ValidRefreshToken_ReturnsNewTokens() throws Exception {
-        // Register and login to get tokens
         AuthRequest authRequest = new AuthRequest("test@example.com", "password123");
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -133,7 +131,6 @@ class AuthIntegrationTests {
         AuthResponse authResponse = objectMapper.readValue(loginResponse, AuthResponse.class);
         String refreshToken = authResponse.getRefreshToken();
 
-        // Refresh token
         mockMvc.perform(post("/auth/refresh-token")
                         .header("Authorization", "Bearer " + refreshToken))
                 .andExpect(status().isOk())
