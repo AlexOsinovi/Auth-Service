@@ -1,4 +1,4 @@
-name: CI Pipeline-Auth
+name: CI Pipeline
 
 on:
   push:
