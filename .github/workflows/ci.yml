@@ -49,9 +49,8 @@ jobs:
           DB_USER: ${{ secrets.POSTGRES_USERNAME }}
           DB_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          JWT_ACCESS_TOKEN_EXPIRATION: 3600
-          JWT_REFRESH_TOKEN_EXPIRATION: 86400
-          USER_SERVICE_URL: http://localhost:8082
+          JWT_ACCESS_TOKEN_EXPIRATION: ${{ JWT_ACCESS_TOKEN_EXPIRATION }}
+          JWT_REFRESH_TOKEN_EXPIRATION: ${{ JWT_REFRESH_TOKEN_EXPIRATION }}
 
       - name: SonarQube Code Analysis
         env:
