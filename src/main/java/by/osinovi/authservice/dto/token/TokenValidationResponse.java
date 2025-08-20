@@ -11,5 +11,5 @@ import lombok.Setter;
 @NoArgsConstructor
 public class TokenValidationResponse {
     private boolean valid;
-    private String username;
+    private String email;
 }

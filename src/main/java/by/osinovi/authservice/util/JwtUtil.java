@@ -1,14 +1,15 @@
 package by.osinovi.authservice.util;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
 import java.util.function.Function;
@@ -28,7 +29,7 @@ public class JwtUtil {
     private final SecretKey secretKey;
 
     public JwtUtil(@Value("${jwt.secret-key}") String secretKeyStr) {
-        this.secretKey = Keys.hmacShaKeyFor(secretKeyStr.getBytes());
+        this.secretKey = Keys.hmacShaKeyFor(secretKeyStr.getBytes(StandardCharsets.UTF_8));
     }
 
     public String generateAccessToken(UserDetails userDetails) {
@@ -53,7 +54,7 @@ public class JwtUtil {
         try {
             String email = extractEmail(token);
             return email.equals(userDetails.getUsername()) && !isTokenExpired(token);
-        } catch (JwtException e) {
+        } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
     }
@@ -66,8 +67,12 @@ public class JwtUtil {
         return REFRESH_TOKEN_SUBJECT.equals(extractClaim(token, Claims::getSubject));
     }
 
-    private boolean isTokenExpired(String token) {
-        return extractClaim(token, Claims::getExpiration).before(new Date());
+    boolean isTokenExpired(String token) {
+        try {
+            return extractClaim(token, Claims::getExpiration).before(new Date());
+        } catch (JwtException e) {
+            return true;
+        }
     }
 
     private <T> T extractClaim(String token, Function<Claims, T> resolver) {
