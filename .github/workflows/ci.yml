@@ -54,7 +54,7 @@ jobs:
         run: |
           echo "Running tests with Maven"
           mvn test verify jacoco:report -X
-          sleep 5  # Задержка для завершения соединений
+          sleep 5
         env:
           DB_URL: jdbc:postgresql://localhost:5432/auth_service_db
           DB_USER: ${{ secrets.POSTGRES_USERNAME }}
