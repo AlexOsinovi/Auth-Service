@@ -63,6 +63,7 @@ class AuthIntegrationTests {
         registry.add("jwt.secret-key", () -> "secret-key-secret-key-secret-key-secret-key");
         registry.add("jwt.access-token-expiration", () -> "3600");
         registry.add("jwt.refresh-token-expiration", () -> "86400");
+
     }
 
     @BeforeAll
