@@ -27,7 +27,7 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers("/auth/register", "/auth/login", "/auth/refresh-token", "/auth/validate-token","/actuator/health/*").permitAll()
+                        .requestMatchers("/auth/register", "/auth/login", "/auth/refresh-token", "/auth/validate-token","/actuator/health/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
